@@ -76,24 +76,30 @@ app.get('/:id',(req, res) => {
       .catch(err => res.status(400).json('Error: ' + err));
   });
   
-  app.patch('/update/:id',(req, res) => {
+  app.patch('/update/:id',upload.single("testImage"),(req, res) => {
     Bike.findByIdAndUpdate(req.params.id,{
       new:true,
       runValidators : true
     })
-      .then(bikes => {
-    Bike.name =req.body.name;
-    Bike.image=req.body.image;
-    Bike.price = Number(req.body.price);
-    Bike.discount=req.body.discount;
-    Bike.charges=req.body.charges;
-  
-        bikes.save()
+      const saveBike =  Bike({
+        bikeName :req.body.bikeName,
+        name: req.body.name,
+        image: {
+          data: fs.readFileSync("uploads/" + req.file.filename),
+          contentType: "image/jpg",
+        },
+        price:Number(req.body.price),
+        discount:req.body.discount,
+        charges:req.body.charges,
+      });
+      saveBike
+        .save()
+      
           .then(() => res.json('user updated!'))
           .catch(err => res.status(400).json('Error: ' + err));
       })
-      .catch(err => res.status(400).json('Error: ' + err));
-  });
+      // .catch(err => res.status(400).json('Error: ' + err));
+  // });
 
 app.listen(port, () => {
     console.log(`Server is running on port : ${port}`);
